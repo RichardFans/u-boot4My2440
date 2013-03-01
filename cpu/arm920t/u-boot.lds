@@ -40,6 +40,7 @@ SECTIONS
 	.text :
 	{
 		cpu/arm920t/start.o	(.text)
+        lib_arm/debug.o (.text)
 		*(.text)
 	}
 

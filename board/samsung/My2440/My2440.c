@@ -29,6 +29,8 @@
 #include <netdev.h>
 #include <s3c2410.h>
 
+#include <asm/io.h>
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define FCLK_SPEED 1
@@ -97,7 +99,7 @@ int board_init (void)
 
 	/* set up the I/O ports */
 	gpio->GPACON = 0x007FFFFF;
-	gpio->GPBCON = 0x00044555;
+	gpio->GPBCON = 0x00295551;
 	gpio->GPBUP = 0x000007FF;
 	gpio->GPCCON = 0xAAAAAAAA;
 	gpio->GPCUP = 0x0000FFFF;
@@ -142,3 +144,52 @@ int board_eth_init(bd_t *bis)
 	return rc;
 }
 #endif
+
+#ifdef CONFIG_MY2440_LED
+void inline coloured_LED_init (void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBCON) & ~0x3fc00 | 0x15400, &gpio->GPBCON);    
+    writel(readl(&gpio->GPBDAT) | 0xf<<5, &gpio->GPBDAT);
+}
+
+void inline red_LED_on (void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) & ~(1<<5), &gpio->GPBDAT);
+}
+
+void inline red_LED_off(void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) | 1<<5, &gpio->GPBDAT);
+}
+
+void inline green_LED_on(void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) & ~(1<<6), &gpio->GPBDAT);
+}
+
+void inline green_LED_off(void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) | 1<<6, &gpio->GPBDAT);
+}
+
+void inline yellow_LED_on(void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) & ~(1<<7), &gpio->GPBDAT);
+}
+
+void inline yellow_LED_off(void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) | 1<<7, &gpio->GPBDAT);
+}
+
+void inline blue_LED_on(void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) & ~(1<<8), &gpio->GPBDAT);
+}
+
+void inline blue_LED_off(void) {
+	struct s3c24x0_gpio * const gpio = s3c24x0_get_base_gpio();
+    writel(readl(&gpio->GPBDAT) | 1<<8, &gpio->GPBDAT);
+}
+#endif
+

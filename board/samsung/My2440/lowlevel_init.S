@@ -134,6 +134,9 @@ lowlevel_init:
     mov ip, lr
     bl pre_lowlevel_init  /* 板级预初始化 */
 	bl system_clock_init  /* 系统时钟初始化 */
+#if defined(CONFIG_ASM_DEBUG)
+    bl uart_asm_init      /* 调试串口初始化 */
+#endif
     bl mem_ctrl_asm_init  /* 内存控制器初始化 */
     mov lr, ip
 
@@ -200,6 +203,43 @@ system_clock_init:
 	str	r2, [r1, #0x04]		/* MPLLCON  */
 
 	mov	pc, lr
+
+/*
+ * 串口初始化函数: 波特率 115200
+ */
+#if defined(CONFIG_ASM_DEBUG)
+
+#include <asm/arch/debug-macro.S>
+
+#define S3C24X0_GPIO_BASE		0x56000000
+#define GPHCON_OFFSET 0x70
+#define UFCON_OFFSET  S3C2410_UFCON
+#define UMCON_OFFSET  S3C2410_UMCON
+#define ULCON_OFFSET  S3C2410_ULCON
+#define UCON_OFFSET   S3C2410_UCON
+#define UBRDIV_OFFSET S3C2410_UBRDIV
+
+uart_asm_init:
+	ldr	r0, =S3C24X0_GPIO_BASE
+	ldr	r1, =0x00faaa
+	str   	r1, [r0, #GPHCON_OFFSET]
+
+	ldr	r0, =UART_CONSOLE_BASE
+	mov	r1, #0x0
+	str	r1, [r0, #UFCON_OFFSET]
+	str	r1, [r0, #UMCON_OFFSET]
+
+	mov	r1, #0x3                	
+	str	r1, [r0, #ULCON_OFFSET]
+
+	ldr	r1, =0x245			
+	str	r1, [r0, #UCON_OFFSET]
+
+	ldr	r1, =0x1A
+	str	r1, [r0, #UBRDIV_OFFSET]
+
+	mov	pc, lr
+#endif /* #if defined(CONFIG_ASM_DEBUG)*/
 
 /*
  * 存储器控制器初始化函数
